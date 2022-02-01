@@ -2,7 +2,7 @@ const fs = require('fs');
 const readline = require('readline');
 const {google} = require('googleapis');
 
-const _SEARCH_QUERY = "name contains '09j21711'";
+const _SEARCH_QUERY = "name contains 'deadbolt'";
 
 var requestCounter = 0;
 
@@ -22,9 +22,9 @@ fs.readFile('./credentials.json', (err, content) => {
 
   // Google returns ~100 files on each request so we call this every 7 minutes to
   // get the next 100 files
-  // TODO: Implement the pageToken/nextPageToken functionality 
+  // TODO: Implement the pageToken/nextPageToken functionality
   setInterval(function(){ authorize(JSON.parse(content), listFiles); }, 420000);
-  
+
 });
 
 /**
@@ -92,7 +92,7 @@ function listFiles(auth) {
     if (err) return console.log('The API returned an error: ' + err);
     const files = res.data.files;
     if (files.length) {
-     
+
       for(let file of files)
         await listRevisions(drive, file);
 
@@ -114,37 +114,38 @@ function listRevisions(drive, file) {
       'fileId': file.id
     }, (err, res) => {
       if (err) return console.log('The API returned an error: ' + err);
-      
+
       const revisions = res.data.revisions;
       if (revisions.length >= 2) {
         console.log('We have 2 or more revisions:');
-        
+
         console.log("");
         console.log(file.name);
         //console.log(revisions);
         console.log("");
-  
-        if(revisions[revisions.length - 1].modifiedTime.startsWith('2019-05-13') ){
+
+        if(revisions[revisions.length - 1].modifiedTime.startsWith('2022-01-25')
+        || revisions[revisions.length - 1].modifiedTime.startsWith('2022-01-26') ){
           drive.revisions.delete({
             'fileId': file.id,
             'revisionId': revisions[revisions.length - 1].id
           }, (err, res) => {
             if (err) return console.log('The API returned an error when trying to delete revision: ' + err);
-    
+
             console.log('FIXED FILED: ', file.name);
-    
+
             renameFile(drive, file);
           })
         }
         //getReivision(drive,file, revisions[1]);
         /*
-        
+
         */
-        
+
       } else if(revisions.length === 1) {
         console.log('Only one revision avialble for ', file.name);
-        renameFile(drive, file);
-  
+//        renameFile(drive, file);
+
       } else {
         console.log('No revisions were found.');
       }
@@ -160,13 +161,13 @@ function listRevisions(drive, file) {
  * Lists the names and IDs of up to 10 files.
  */
 function renameFile(drive, file) {
-  var body = {'name': file.name.replace('.09j21711', '')};
+  var body = {'name': file.name.replace('.deadbolt', '')};
   drive.files.update({
     'fileId': file.id,
     'resource': body
   }, (err, res) => {
     if (err) return console.log('The API returned an error when RENAMING the file: ' + err);
-  
+
       console.log('FILE RENAMED');
 
   });
